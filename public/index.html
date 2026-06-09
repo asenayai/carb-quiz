@@ -109,9 +109,11 @@
       <h1>คาร์โบไฮเดรต · AP Review</h1>
       <p class="subtitle">5 ข้อ · glycosidic linkage · hydrolysis</p>
       <div class="card">
-        <label for="player-name">ชื่อ–นามสกุล (หรือรหัสนักเรียน)</label>
-        <input type="text" id="player-name" placeholder="เช่น สมชาย ใจดี หรือ M40123" maxlength="40">
-        <button class="btn" id="start-btn" style="width:100%">เริ่ม Quiz</button>
+        <label for="player-name">ชื่อ–นามสกุล</label>
+        <input type="text" id="player-name" placeholder="เช่น สมชาย ใจดี" maxlength="40">
+        <label for="student-id" style="display:block;margin-top:0.75rem">รหัสนักเรียน (ถ้ามี)</label>
+        <input type="text" id="student-id" placeholder="เช่น M40123" maxlength="20">
+        <button class="btn" id="start-btn" style="width:100%;margin-top:1rem">เริ่ม Quiz</button>
       </div>
     </div>
 
@@ -207,9 +209,12 @@
     const SHAPES = ["triangle", "diamond", "circle", "square"];
     const MAX_SCORE = QUESTIONS.reduce((s, q) => s + 1000, 0);
 
+    const QUIZ_ID = "carb-ap";
+
     let current = 0, score = 0, correctCount = 0;
     let timerId = null, timeLeft = 0, answered = false;
-    let playerName = "", answerLog = [];
+    let playerName = "", studentId = "", answerLog = [];
+    let quizStartedAt = null;
 
     const $ = id => document.getElementById(id);
     const show = id => {
@@ -317,11 +322,16 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            quiz_id: QUIZ_ID,
             student_name: playerName,
+            student_id: studentId || null,
             score,
             max_score: MAX_SCORE,
             correct_count: correctCount,
             total_questions: QUESTIONS.length,
+            duration_sec: quizStartedAt
+              ? Math.round((Date.now() - quizStartedAt) / 1000)
+              : null,
             answers: answerLog,
           }),
         });
@@ -366,11 +376,13 @@
 
     $("start-btn").onclick = () => {
       playerName = $("player-name").value.trim();
+      studentId = $("student-id").value.trim();
       if (!playerName) {
-        alert("กรุณากรอกชื่อหรือรหัสนักเรียน");
+        alert("กรุณากรอกชื่อ");
         return;
       }
       current = 0; score = 0; correctCount = 0; answerLog = [];
+      quizStartedAt = Date.now();
       $("score-display").textContent = "คะแนน: 0";
       show("quiz-screen");
       renderQuestion();

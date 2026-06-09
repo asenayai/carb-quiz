@@ -4,6 +4,7 @@
   "private": true,
   "description": "คาร์โบไฮเดรต AP quiz with score tracking",
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.1"
+    "@supabase/supabase-js": "^2.49.1",
+    "pg": "^8.13.1"
   }
 }

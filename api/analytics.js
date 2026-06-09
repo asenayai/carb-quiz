@@ -4,9 +4,7 @@ function checkAdmin(req) {
   const password = process.env.ADMIN_PASSWORD;
   if (!password) return false;
   const provided =
-    req.headers["x-admin-password"] ||
-    req.query.password ||
-    "";
+    req.headers["x-admin-password"] || req.query.password || "";
   return provided === password;
 }
 
@@ -20,19 +18,25 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const supabase = getSupabase();
     const quiz_id = String(req.query.quiz_id || "carb-ap");
+    const supabase = getSupabase();
 
-    const { data, error } = await supabase
-      .from("quiz_attempts")
-      .select("*, quiz_answer_details(*)")
+    const { data: questionStats, error: statsError } = await supabase
+      .from("quiz_question_stats")
+      .select("*")
       .eq("quiz_id", quiz_id)
-      .order("created_at", { ascending: false })
-      .limit(500);
+      .order("question_num", { ascending: true });
 
-    if (error) throw error;
+    if (statsError) throw statsError;
 
-    const rows = data || [];
+    const { data: attempts, error: attemptsError } = await supabase
+      .from("quiz_attempts")
+      .select("student_name, score, max_score, correct_count, created_at")
+      .eq("quiz_id", quiz_id);
+
+    if (attemptsError) throw attemptsError;
+
+    const rows = attempts || [];
     const summary = {
       quiz_id,
       total_attempts: rows.length,
@@ -47,19 +51,12 @@ module.exports = async function handler(req, res) {
         : 0,
     };
 
-    const { data: questionStats } = await supabase
-      .from("quiz_question_stats")
-      .select("*")
-      .eq("quiz_id", quiz_id)
-      .order("question_num", { ascending: true });
-
     return res.status(200).json({
       summary,
       question_stats: questionStats || [],
-      attempts: rows,
     });
   } catch (err) {
-    console.error("results error:", err);
+    console.error("analytics error:", err);
     return res.status(500).json({ error: err.message || "Server error" });
   }
 };

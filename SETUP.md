@@ -11,14 +11,19 @@ Scores are stored in **Supabase** (free). Each attempt saves name, score, and pe
 
 ---
 
-## Step 1 — Supabase (free database)
+## Step 1 — Supabase (project: ungdcpmarivrrhhmvdbb)
 
-1. Go to [supabase.com](https://supabase.com) → Sign up
-2. **New project** → choose region (Singapore is closest to Thailand)
-3. **SQL Editor** → New query → paste contents of `supabase/schema.sql` → Run
+1. Open [SQL Editor](https://supabase.com/dashboard/project/ungdcpmarivrrhhmvdbb/sql/new)
+2. Paste contents of `supabase/schema.sql` → **Run**
+3. Creates 3 tables + analytics view:
+   - `quizzes` — quiz catalog
+   - `quiz_attempts` — each student session (score, name, JSON answers)
+   - `quiz_answer_details` — one row per question (for analytics at scale)
+   - `quiz_question_stats` — view: % correct per question
+
 4. **Project Settings → API** → copy:
-   - `Project URL` → `SUPABASE_URL`
-   - `service_role` key (secret!) → `SUPABASE_SERVICE_ROLE_KEY`
+   - `Project URL` → `SUPABASE_URL` = `https://ungdcpmarivrrhhmvdbb.supabase.co`
+   - `service_role` key → `SUPABASE_SERVICE_ROLE_KEY`
 
 ---
 
@@ -61,9 +66,10 @@ Or sign in via **GitHub Desktop** and push from there.
 
 | Name | Value |
 |------|-------|
-| `SUPABASE_URL` | from Supabase |
-| `SUPABASE_SERVICE_ROLE_KEY` | from Supabase (service_role) |
-| `ADMIN_PASSWORD` | password for /admin page |
+| `SUPABASE_URL` | `https://ungdcpmarivrrhhmvdbb.supabase.co` |
+| `SUPABASE_SERVICE_ROLE_KEY` | service_role key from Supabase API settings |
+| `ADMIN_PASSWORD` | password for /admin page (you choose) |
+| `DATABASE_URL` | *(optional)* Supabase Database URI — for `/api/migrate` auto-setup |
 
 4. **Deploy**
 
