@@ -28,7 +28,13 @@ const labelByStatus = {
   missed: "⏱ ไม่ได้ตอบ",
 };
 
-export function ReviewPanel({ attempt }: { attempt: QuizAttempt }) {
+export function ReviewPanel({
+  attempt,
+  imageMap = {},
+}: {
+  attempt: QuizAttempt;
+  imageMap?: Record<string, string>;
+}) {
   const pct = Math.round((attempt.score / attempt.max_score) * 100);
 
   return (
@@ -71,14 +77,17 @@ export function ReviewPanel({ attempt }: { attempt: QuizAttempt }) {
                 {q.text}
               </p>
 
-              {q.image && (
+              {(imageMap[String(q.id)] || q.image) && (
                 <div className="relative mt-3 overflow-hidden rounded-xl border border-slate-100 bg-white">
                   <Image
-                    src={q.image}
+                    src={imageMap[String(q.id)] || q.image!}
                     alt={`Question ${q.id}`}
                     width={800}
                     height={400}
                     className="h-auto max-h-48 w-full object-contain"
+                    unoptimized={(imageMap[String(q.id)] || q.image || "").includes(
+                      "supabase.co"
+                    )}
                   />
                 </div>
               )}

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { QUIZ_ID } from "@/lib/quiz-data";
+import { getCurrentClass } from "@/lib/quiz-settings";
 import { computeAttempt } from "@/lib/scoring";
 import { getSupabase } from "@/lib/supabase/server";
 
@@ -30,11 +31,13 @@ export async function POST(request: Request) {
     const { nickname, picks, durationSec } = parsed.data;
     const computed = computeAttempt(picks);
     const supabase = getSupabase();
+    const classLabel = await getCurrentClass(supabase);
 
     const { data: attempt, error: attemptError } = await supabase
       .from("quiz_attempts")
       .insert({
         quiz_id: QUIZ_ID,
+        class_label: classLabel,
         student_name: nickname,
         score: computed.score,
         max_score: computed.maxScore,

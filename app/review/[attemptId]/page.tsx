@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Leaderboard } from "@/components/Leaderboard";
 import { ReviewPanel } from "@/components/ReviewPanel";
+import { getQuestionImageMap } from "@/lib/quiz-settings";
 import { getSupabase } from "@/lib/supabase/server";
 import type { AnswerRecord, QuizAttempt } from "@/lib/types";
 
@@ -26,6 +27,8 @@ export default async function ReviewPage({
       answers: (data.answers as AnswerRecord[]) || [],
     };
 
+    const imageMap = await getQuestionImageMap(supabase);
+
     return (
       <main className="px-4 py-8">
         <header className="mx-auto mb-6 max-w-5xl text-center">
@@ -34,7 +37,7 @@ export default async function ReviewPage({
             ข้อที่ผิดและไม่ได้ตอบ พร้อมเฉลย
           </p>
         </header>
-        <ReviewPanel attempt={attempt} />
+        <ReviewPanel attempt={attempt} imageMap={imageMap} />
         <div className="mx-auto mt-4 w-full max-w-5xl px-2 sm:px-4">
           <Leaderboard />
         </div>

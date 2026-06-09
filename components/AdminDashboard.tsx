@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AdminClassSettings } from "./AdminClassSettings";
+import { AdminImageManager } from "./AdminImageManager";
 import { Button, Card, Input } from "./ui";
 import type { QuestionStat } from "@/lib/types";
 
@@ -8,6 +10,7 @@ const AUTH_KEY = "carb-quiz-admin-auth";
 
 type AttemptRow = {
   created_at: string;
+  class_label?: string;
   student_name: string;
   student_id?: string | null;
   score: number;
@@ -27,7 +30,13 @@ type ResultsData = {
   };
   question_stats: QuestionStat[];
   attempts: AttemptRow[];
+  refreshed_at?: string;
+  class_labels?: string[];
+  current_class?: string;
+  question_images?: Record<string, string>;
 };
+
+const AUTO_REFRESH_MS = 30_000;
 
 function StatCard({
   value,
@@ -102,6 +111,7 @@ function SubmissionsTable({ attempts }: { attempts: AttemptRow[] }) {
         <thead>
           <tr className="border-b border-slate-200 text-left text-xs font-medium text-slate-500">
             <th className="pb-3 pr-4 font-heading">ส่งเมื่อ</th>
+            <th className="pb-3 pr-4 font-heading">ชั้น</th>
             <th className="pb-3 pr-4 font-heading">ชื่อเล่น</th>
             <th className="pb-3 pr-4 font-heading">คะแนน</th>
             <th className="pb-3 pr-4 font-heading">ถูก</th>
@@ -125,6 +135,11 @@ function SubmissionsTable({ attempts }: { attempts: AttemptRow[] }) {
                   <p className="text-xs tabular-nums text-slate-400">
                     {submitted.time}
                   </p>
+                </td>
+                <td className="py-3 pr-4 align-top">
+                  <span className="rounded-full bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700">
+                    {row.class_label || "ทั่วไป"}
+                  </span>
                 </td>
                 <td className="py-3 pr-4 align-top">
                   <p className="font-heading font-semibold text-slate-800">
@@ -179,6 +194,12 @@ export function AdminDashboard() {
   const [error, setError] = useState("");
   const [data, setData] = useState<ResultsData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [selectedClass, setSelectedClass] = useState("");
+  const [questionImages, setQuestionImages] = useState<Record<string, string>>(
+    {}
+  );
 
   useEffect(() => {
     const saved = sessionStorage.getItem(AUTH_KEY);
@@ -195,26 +216,80 @@ export function AdminDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated]);
 
-  async function load(pwd = password) {
-    setLoading(true);
+  useEffect(() => {
+    if (authenticated && password) {
+      load(password, { quiet: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedClass]);
+
+  useEffect(() => {
+    if (!authenticated || !password || !autoRefresh) return;
+    const id = setInterval(() => load(password, { quiet: true }), AUTO_REFRESH_MS);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authenticated, password, autoRefresh, selectedClass]);
+
+  async function loadSettings(pwd = password) {
+    const res = await fetch("/api/admin/settings", {
+      cache: "no-store",
+      headers: { "x-admin-password": pwd },
+    });
+    if (res.ok) {
+      const json = await res.json();
+      setQuestionImages(json.questionImages || {});
+    }
+  }
+
+  async function load(
+    pwd = password,
+    opts: { quiet?: boolean } = {}
+  ) {
+    if (!opts.quiet) setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/results", {
-        headers: { "x-admin-password": pwd },
+      const classQuery = selectedClass
+        ? `?class=${encodeURIComponent(selectedClass)}`
+        : "";
+      const res = await fetch(`/api/results${classQuery}`, {
+        cache: "no-store",
+        headers: {
+          "x-admin-password": pwd,
+          "Cache-Control": "no-cache",
+        },
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "โหลดไม่สำเร็จ");
       setData(json);
+      if (json.question_images) setQuestionImages(json.question_images);
+      await loadSettings(pwd);
+      setLastRefreshedAt(
+        json.refreshed_at ? new Date(json.refreshed_at) : new Date()
+      );
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error");
-      setData(null);
+      if (!opts.quiet) {
+        setError(e instanceof Error ? e.message : "Error");
+        setData(null);
+      }
       if (e instanceof Error && e.message === "Unauthorized") {
         sessionStorage.removeItem(AUTH_KEY);
         setAuthenticated(false);
       }
     } finally {
-      setLoading(false);
+      if (!opts.quiet) setLoading(false);
     }
+  }
+
+  function formatLastRefreshed() {
+    if (!lastRefreshedAt) return null;
+    return lastRefreshedAt.toLocaleString("th-TH", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
   }
 
   function handleLogin() {
@@ -323,7 +398,7 @@ export function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="font-accent text-base text-teal-700">
             MWIT Biology Class
@@ -331,16 +406,38 @@ export function AdminDashboard() {
           <h2 className="font-heading text-lg font-bold text-slate-800">
             สรุปผลนักเรียน
           </h2>
+          {lastRefreshedAt && (
+            <p className="mt-1 text-xs text-slate-400">
+              อัปเดตล่าสุด:{" "}
+              <span className="tabular-nums">{formatLastRefreshed()}</span>
+              {autoRefresh && (
+                <span className="ml-1 text-teal-600">· อัปเดตอัตโนมัติทุก 30 วินาที</span>
+              )}
+            </p>
+          )}
         </div>
-        <div className="flex gap-2">
-          <Button variant="ghost" onClick={() => load()} disabled={loading}>
-            {loading ? "กำลังโหลด..." : "รีเฟรช"}
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="secondary"
+            onClick={() => load()}
+            disabled={loading}
+          >
+            {loading ? "กำลังโหลด..." : "↻ อัปเดตคะแนน"}
           </Button>
           {data && (
-            <Button variant="secondary" onClick={exportCsv}>
+            <Button variant="ghost" onClick={exportCsv}>
               Export CSV
             </Button>
           )}
+          <label className="flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600">
+            <input
+              type="checkbox"
+              checked={autoRefresh}
+              onChange={(e) => setAutoRefresh(e.target.checked)}
+              className="accent-teal-600"
+            />
+            อัตโนมัติ
+          </label>
           <Button variant="ghost" onClick={handleLogout}>
             ออกจากระบบ
           </Button>
@@ -361,6 +458,24 @@ export function AdminDashboard() {
 
       {data && (
         <>
+          <AdminClassSettings
+            password={password}
+            currentClass={data.current_class || "ทั่วไป"}
+            classLabels={data.class_labels || []}
+            selectedClass={selectedClass}
+            onClassChange={setSelectedClass}
+            onRefresh={() => load()}
+          />
+
+          <AdminImageManager
+            password={password}
+            questionImages={questionImages}
+            onUpdated={() => {
+              loadSettings();
+              load(undefined, { quiet: true });
+            }}
+          />
+
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <StatCard
               value={data.summary.total_attempts}

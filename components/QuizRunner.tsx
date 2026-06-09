@@ -20,13 +20,22 @@ export function QuizRunner() {
   const [showExplain, setShowExplain] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [startedAt] = useState(Date.now());
+  const [imageMap, setImageMap] = useState<Record<string, string>>({});
 
   const q = QUESTIONS[current];
+  const imageSrc = imageMap[String(q.id)] || q.image;
 
   useEffect(() => {
     const nickname = getStoredNickname();
     if (!nickname) router.replace("/");
   }, [router]);
+
+  useEffect(() => {
+    fetch("/api/quiz-config")
+      .then((r) => r.json())
+      .then((d) => setImageMap(d.questionImages || {}))
+      .catch(() => {});
+  }, []);
 
   const reveal = useCallback(
     (choice: number | null) => {
@@ -121,15 +130,16 @@ export function QuizRunner() {
           {q.text}
         </p>
 
-        {q.image && (
+        {imageSrc && (
           <div className="relative mt-6 overflow-hidden rounded-xl border-2 border-slate-100 bg-white shadow-inner">
             <Image
-              src={q.image}
+              src={imageSrc}
               alt={`Question ${q.id}`}
               width={1200}
               height={600}
               className="h-auto max-h-96 w-full object-contain"
               priority
+              unoptimized={imageSrc.includes("supabase.co")}
             />
           </div>
         )}
