@@ -1,0 +1,9 @@
+{
+  "name": "carb-quiz",
+  "version": "1.0.0",
+  "private": true,
+  "description": "คาร์โบไฮเดรต AP quiz with score tracking",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1"
+  }
+}
