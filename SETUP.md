@@ -22,29 +22,41 @@ Scores are stored in **Supabase** (free). Each attempt saves name, score, and pe
 
 ---
 
-## Step 2 — GitHub repo
+## Step 2 — GitHub repo (asenayai)
+
+Local git is ready. Remote is set to:
+
+`https://github.com/asenayai/carb-quiz.git`
+
+### 2a. Create empty repo on GitHub
+
+1. Open [github.com/new](https://github.com/new?name=carb-quiz&description=Carbohydrate+AP+quiz)
+2. Owner: **asenayai**
+3. Repository name: **carb-quiz**
+4. **Do not** add README, .gitignore, or license (repo must be empty)
+5. Click **Create repository**
+
+### 2b. Push from your Mac
 
 ```bash
-cd carb-quiz
-git init
-git add .
-git commit -m "Carbohydrate AP quiz with score tracking"
-```
-
-Create a new repo on GitHub, then:
-
-```bash
-git remote add origin https://github.com/YOUR_USER/carb-quiz.git
-git branch -M main
+cd "/Users/athita.s/Documents/MWIT_teacher/carb-quiz"
 git push -u origin main
 ```
+
+When prompted for credentials:
+- **Username:** `asenayai`
+- **Password:** use a [Personal Access Token](https://github.com/settings/tokens) (not your GitHub password)
+  - GitHub → Settings → Developer settings → Personal access tokens → Generate (classic)
+  - Scope: `repo`
+
+Or sign in via **GitHub Desktop** and push from there.
 
 ---
 
 ## Step 3 — Vercel (free hosting)
 
-1. Go to [vercel.com](https://vercel.com) → Sign up with GitHub
-2. **Add New Project** → import `carb-quiz` repo
+1. Go to [vercel.com](https://vercel.com) → Sign up with GitHub account **asenayai** (email: asenayai73@gmail.com)
+2. **Add New Project** → import **asenayai/carb-quiz** repo
 3. **Environment Variables** (add all 3):
 
 | Name | Value |
