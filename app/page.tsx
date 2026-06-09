@@ -3,7 +3,7 @@ import { ScienceChip } from "@/components/ui";
 
 export default function HomePage() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-lg flex-col justify-center px-4 py-12">
+    <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col justify-center px-6 py-12 sm:px-10">
       <header className="mb-8 text-center">
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-400 to-sky-500 text-2xl shadow-lg shadow-sky-200">
           🧬

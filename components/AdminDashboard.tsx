@@ -80,50 +80,95 @@ function QuestionBar({ stat }: { stat: QuestionStat }) {
   );
 }
 
-function StudentRow({ row }: { row: AttemptRow }) {
-  const pct = Math.round((row.score / row.max_score) * 100);
-  const initial = row.student_name.charAt(0).toUpperCase();
+function formatSubmittedAt(iso: string) {
+  const d = new Date(iso);
+  const date = d.toLocaleDateString("th-TH", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+  const time = d.toLocaleTimeString("th-TH", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+  return { date, time, full: `${date} ${time}` };
+}
 
+function SubmissionsTable({ attempts }: { attempts: AttemptRow[] }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/80 px-4 py-3 transition hover:bg-slate-50">
-      <div className="font-heading flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-teal-400 to-sky-500 text-sm font-bold text-white">
-        {initial}
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="font-heading truncate font-semibold text-slate-800">
-          {row.student_name}
-        </p>
-        <p className="text-xs text-slate-400">
-          {new Date(row.created_at).toLocaleString("th-TH", {
-            dateStyle: "short",
-            timeStyle: "short",
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[640px] text-sm">
+        <thead>
+          <tr className="border-b border-slate-200 text-left text-xs font-medium text-slate-500">
+            <th className="pb-3 pr-4 font-heading">ส่งเมื่อ</th>
+            <th className="pb-3 pr-4 font-heading">ชื่อเล่น</th>
+            <th className="pb-3 pr-4 font-heading">คะแนน</th>
+            <th className="pb-3 pr-4 font-heading">ถูก</th>
+            <th className="pb-3 pr-4 font-heading">ใช้เวลา</th>
+            <th className="pb-3 font-heading">รายข้อ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {attempts.map((row) => {
+            const pct = Math.round((row.score / row.max_score) * 100);
+            const submitted = formatSubmittedAt(row.created_at);
+            return (
+              <tr
+                key={`${row.created_at}-${row.student_name}-${row.score}`}
+                className="border-b border-slate-100 last:border-0"
+              >
+                <td className="py-3 pr-4 align-top">
+                  <p className="font-medium tabular-nums text-slate-700">
+                    {submitted.date}
+                  </p>
+                  <p className="text-xs tabular-nums text-slate-400">
+                    {submitted.time}
+                  </p>
+                </td>
+                <td className="py-3 pr-4 align-top">
+                  <p className="font-heading font-semibold text-slate-800">
+                    {row.student_name}
+                  </p>
+                </td>
+                <td className="py-3 pr-4 align-top">
+                  <p className="font-heading font-bold tabular-nums text-emerald-600">
+                    {pct}%
+                  </p>
+                  <p className="text-xs tabular-nums text-slate-400">
+                    {row.score}/{row.max_score}
+                  </p>
+                </td>
+                <td className="py-3 pr-4 align-top tabular-nums text-slate-600">
+                  {row.correct_count}/{row.total_questions}
+                </td>
+                <td className="py-3 pr-4 align-top text-slate-500">
+                  {row.duration_sec != null
+                    ? `${row.duration_sec} วินาที`
+                    : "—"}
+                </td>
+                <td className="py-3 align-top">
+                  <div className="flex flex-wrap gap-1">
+                    {(row.answers || []).map((a) => (
+                      <span
+                        key={a.question}
+                        className={`font-heading flex h-6 w-6 items-center justify-center rounded-md text-xs font-bold ${
+                          a.is_correct
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-red-100 text-red-600"
+                        }`}
+                        title={`ข้อ ${a.question}`}
+                      >
+                        {a.question}
+                      </span>
+                    ))}
+                  </div>
+                </td>
+              </tr>
+            );
           })}
-          {row.duration_sec != null && ` · ${row.duration_sec} วินาที`}
-        </p>
-      </div>
-      <div className="text-right">
-        <p className="font-heading text-lg font-bold tabular-nums text-emerald-600">
-          {pct}%
-        </p>
-        <p className="text-xs text-slate-400">
-          {row.correct_count}/{row.total_questions} ข้อ
-        </p>
-      </div>
-      <div className="hidden gap-0.5 sm:flex">
-        {(row.answers || []).map((a) => (
-          <span
-            key={a.question}
-            className={`font-heading flex h-6 w-6 items-center justify-center rounded-md text-xs font-bold ${
-              a.is_correct
-                ? "bg-emerald-100 text-emerald-700"
-                : "bg-red-100 text-red-600"
-            }`}
-            title={`ข้อ ${a.question}`}
-          >
-            {a.question}
-          </span>
-        ))}
-      </div>
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -344,7 +389,7 @@ export function AdminDashboard() {
               <h3 className="font-heading mb-4 text-base font-bold text-slate-800">
                 วิเคราะห์รายข้อ
               </h3>
-              <div className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 {data.question_stats.map((s) => (
                   <QuestionBar key={s.question_num} stat={s} />
                 ))}
@@ -364,14 +409,7 @@ export function AdminDashboard() {
                 ยังไม่มีนักเรียนทำ quiz
               </p>
             ) : (
-              <div className="space-y-2">
-                {data.attempts.map((r) => (
-                  <StudentRow
-                    key={`${r.created_at}-${r.student_name}-${r.score}`}
-                    row={r}
-                  />
-                ))}
-              </div>
+              <SubmissionsTable attempts={data.attempts} />
             )}
           </Card>
         </>

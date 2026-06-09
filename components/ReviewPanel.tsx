@@ -32,7 +32,7 @@ export function ReviewPanel({ attempt }: { attempt: QuizAttempt }) {
   const pct = Math.round((attempt.score / attempt.max_score) * 100);
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4">
+    <div className="mx-auto w-full max-w-5xl space-y-4 px-2 sm:px-4">
       <Card className="border-sky-200 bg-gradient-to-br from-sky-50 to-white text-center">
         <p className="text-sm font-semibold text-sky-600">{attempt.student_name}</p>
         <p className="font-heading mt-2 text-4xl font-bold tabular-nums text-slate-800">

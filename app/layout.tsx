@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AdminCornerLink } from "@/components/AdminCornerLink";
 import { kanit, notoSansThai, thasadith } from "@/lib/fonts";
 import "./globals.css";
 
@@ -17,7 +18,10 @@ export default function RootLayout({
       lang="th"
       className={`${notoSansThai.variable} ${kanit.variable} ${thasadith.variable}`}
     >
-      <body className={notoSansThai.className}>{children}</body>
+      <body className={notoSansThai.className}>
+        {children}
+        <AdminCornerLink />
+      </body>
     </html>
   );
 }

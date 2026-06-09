@@ -3,7 +3,7 @@ import { ScienceChip } from "@/components/ui";
 
 export default function AdminPage() {
   return (
-    <main className="mx-auto min-h-screen max-w-4xl px-4 py-10">
+    <main className="mx-auto min-h-screen w-full max-w-6xl px-4 py-10 sm:px-8">
       <header className="mb-8 text-center">
         <ScienceChip>MWIT Biology Class</ScienceChip>
         <h1 className="font-heading mt-3 text-2xl font-bold text-slate-800">

@@ -27,7 +27,7 @@ export function NicknameForm() {
   }
 
   return (
-    <Card className="mx-auto max-w-md">
+    <Card className="mx-auto w-full">
       <label htmlFor="nickname" className="font-heading mb-2 block text-sm font-semibold text-slate-600">
         ชื่อเล่น
       </label>

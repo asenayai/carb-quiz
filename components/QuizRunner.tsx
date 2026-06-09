@@ -99,13 +99,13 @@ export function QuizRunner() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <div className="mb-3 flex items-center justify-between text-sm font-semibold text-slate-500">
-        <span className="font-heading rounded-full bg-sky-100 px-3 py-1 font-semibold text-sky-700">
+    <div className="mx-auto w-full max-w-5xl px-2 sm:px-4">
+      <div className="mb-4 flex items-center justify-between text-sm font-semibold text-slate-500">
+        <span className="font-heading rounded-full bg-sky-100 px-4 py-1.5 font-semibold text-sky-700">
           ข้อ {current + 1}/{QUESTIONS.length}
         </span>
         <span
-          className={`mono-science flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold tabular-nums ${
+          className={`mono-science flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold tabular-nums ${
             timeLeft <= 5 && !answered
               ? "bg-orange-100 text-orange-600 ring-2 ring-orange-300"
               : "bg-white text-slate-700 shadow-sm ring-1 ring-slate-200"
@@ -116,47 +116,49 @@ export function QuizRunner() {
       </div>
       <ProgressBar value={current + (answered ? 1 : 0)} max={QUESTIONS.length} />
 
-      <Card className="mt-4">
-        <p className="text-[15px] font-medium leading-relaxed text-slate-700">
+      <Card className="mt-5 p-6 sm:p-8">
+        <p className="font-heading text-base font-medium leading-relaxed text-slate-700 sm:text-lg">
           {q.text}
         </p>
 
         {q.image && (
-          <div className="relative mt-4 overflow-hidden rounded-xl border-2 border-slate-100 bg-white shadow-inner">
+          <div className="relative mt-6 overflow-hidden rounded-xl border-2 border-slate-100 bg-white shadow-inner">
             <Image
               src={q.image}
               alt={`Question ${q.id}`}
-              width={800}
-              height={400}
-              className="h-auto max-h-72 w-full object-contain"
+              width={1200}
+              height={600}
+              className="h-auto max-h-96 w-full object-contain"
               priority
             />
           </div>
         )}
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="mt-6 flex flex-col gap-3">
           {q.choices.map((choice, i) => (
             <button
               key={i}
               disabled={answered}
               onClick={() => reveal(i)}
-              className={`flex items-start gap-2 rounded-xl px-3 py-3 text-left text-sm font-semibold transition active:translate-y-0.5 ${choiceClass(i)}`}
+              className={`flex w-full items-center gap-3 rounded-xl px-4 py-4 text-left text-sm font-semibold transition active:translate-y-0.5 sm:px-5 sm:py-5 sm:text-base ${choiceClass(i)}`}
             >
-              <span className="mt-0.5 text-base opacity-80">{SHAPES[i]}</span>
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-black/10 text-base">
+                {SHAPES[i]}
+              </span>
               <span className="mono-science leading-snug">{choice}</span>
             </button>
           ))}
         </div>
 
         {showExplain && (
-          <div className="mono-science mt-4 rounded-xl border-2 border-teal-100 bg-teal-50 px-4 py-3 text-sm text-teal-800">
+          <div className="mono-science mt-6 rounded-xl border-2 border-teal-100 bg-teal-50 px-5 py-4 text-sm text-teal-800 sm:text-base">
             💡 {q.explain}
           </div>
         )}
 
         {answered && (
           <Button
-            className="mt-4 w-full"
+            className="mt-6 w-full sm:max-w-md"
             onClick={handleNext}
             disabled={submitting}
           >
