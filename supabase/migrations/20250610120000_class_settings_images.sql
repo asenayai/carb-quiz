@@ -28,6 +28,8 @@ values (
 )
 on conflict (id) do nothing;
 
-create policy if not exists "quiz_images_public_read"
+-- PostgreSQL does not support CREATE POLICY IF NOT EXISTS
+drop policy if exists "quiz_images_public_read" on storage.objects;
+create policy "quiz_images_public_read"
   on storage.objects for select
   using (bucket_id = 'quiz-images');
