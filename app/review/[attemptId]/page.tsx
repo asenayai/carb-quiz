@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { Leaderboard } from "@/components/Leaderboard";
 import { ReviewPanel } from "@/components/ReviewPanel";
-import { getQuestionImageMap } from "@/lib/quiz-settings";
+import { getQuestionImageMap } from "@/lib/quiz-images";
 import { getSupabase } from "@/lib/supabase/server";
 import type { AnswerRecord, QuizAttempt } from "@/lib/types";
 

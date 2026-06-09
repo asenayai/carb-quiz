@@ -33,7 +33,7 @@ export function AdminImageManager({
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "อัปโหลดไม่สำเร็จ");
-      setMessage(`อัปเดตรูปข้อ ${question} แล้ว`);
+      setMessage(`อัปเดตรูปข้อ ${question} แล้ว — นักเรียนจะเห็นรูปใหม่ทันที`);
       onUpdated();
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Error");

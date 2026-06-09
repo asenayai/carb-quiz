@@ -10,7 +10,11 @@ import type { PickPayload } from "@/lib/types";
 
 const SHAPES = ["▲", "◆", "●", "■"];
 
-export function QuizRunner() {
+export function QuizRunner({
+  initialImages = {},
+}: {
+  initialImages?: Record<string, string>;
+}) {
   const router = useRouter();
   const [current, setCurrent] = useState(0);
   const [timeLeft, setTimeLeft] = useState(QUESTIONS[0].timeSec);
@@ -20,7 +24,8 @@ export function QuizRunner() {
   const [showExplain, setShowExplain] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [startedAt] = useState(Date.now());
-  const [imageMap, setImageMap] = useState<Record<string, string>>({});
+  const [imageMap, setImageMap] =
+    useState<Record<string, string>>(initialImages);
 
   const q = QUESTIONS[current];
   const imageSrc = imageMap[String(q.id)] || q.image;
@@ -31,9 +36,11 @@ export function QuizRunner() {
   }, [router]);
 
   useEffect(() => {
-    fetch("/api/quiz-config")
+    fetch("/api/quiz-config", { cache: "no-store" })
       .then((r) => r.json())
-      .then((d) => setImageMap(d.questionImages || {}))
+      .then((d) => {
+        if (d.questionImages) setImageMap(d.questionImages);
+      })
       .catch(() => {});
   }, []);
 

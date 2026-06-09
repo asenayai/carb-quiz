@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { QUIZ_ID, QUESTIONS } from "@/lib/quiz-data";
+import { QUESTIONS } from "@/lib/quiz-data";
 import {
   defaultQuestionImages,
-  getSetting,
-  setSetting,
-} from "@/lib/quiz-settings";
+  ensureQuizImagesBucket,
+  imagePathForQuestion,
+  publicImageUrl,
+} from "@/lib/quiz-images";
 import { getSupabase } from "@/lib/supabase/server";
 import { checkAdminPassword } from "@/lib/utils";
 
@@ -45,43 +46,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Max 5 MB" }, { status: 400 });
     }
 
-    const ext =
-      file.type === "image/png"
-        ? "png"
-        : file.type === "image/webp"
-          ? "webp"
-          : "jpg";
-
-    const path = `${QUIZ_ID}/q${question}.${ext}`;
-    const buffer = Buffer.from(await file.arrayBuffer());
     const supabase = getSupabase();
+    await ensureQuizImagesBucket(supabase);
+
+    const path = imagePathForQuestion(question, file.type);
+    const buffer = Buffer.from(await file.arrayBuffer());
 
     const { error: uploadError } = await supabase.storage
       .from("quiz-images")
       .upload(path, buffer, {
         upsert: true,
         contentType: file.type,
-        cacheControl: "3600",
+        cacheControl: "60",
       });
 
     if (uploadError) throw uploadError;
 
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("quiz-images").getPublicUrl(path);
-
-    const url = `${publicUrl}?v=${Date.now()}`;
-    const existing =
-      (await getSetting<Record<string, string>>(
-        supabase,
-        "question_images"
-      )) ?? {};
-    const merged = { ...defaultQuestionImages(), ...existing };
-    merged[String(question)] = url;
-    await setSetting(supabase, "question_images", merged);
+    const url = publicImageUrl(supabase, path, String(Date.now()));
 
     return NextResponse.json({ ok: true, question, url });
   } catch (err) {
+    console.error("upload-image:", err);
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Server error" },
       { status: 500 }
@@ -106,16 +91,21 @@ export async function DELETE(request: Request) {
     }
 
     const supabase = getSupabase();
-    const existing =
-      (await getSetting<Record<string, string>>(
-        supabase,
-        "question_images"
-      )) ?? {};
-    const defaults = defaultQuestionImages();
-    const merged = { ...defaults, ...existing };
-    merged[String(question)] = defaults[String(question)];
-    await setSetting(supabase, "question_images", merged);
+    const { data: files } = await supabase.storage.from("quiz-images").list(
+      "carb-ap",
+      { search: `q${question}.` }
+    );
 
+    const toRemove =
+      files
+        ?.filter((f) => f.name.startsWith(`q${question}.`))
+        .map((f) => `carb-ap/${f.name}`) ?? [];
+
+    if (toRemove.length > 0) {
+      await supabase.storage.from("quiz-images").remove(toRemove);
+    }
+
+    const defaults = defaultQuestionImages();
     return NextResponse.json({
       ok: true,
       question,
