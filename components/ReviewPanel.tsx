@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { QUESTIONS } from "@/lib/quiz-data";
 import type { AnswerRecord, QuizAttempt } from "@/lib/types";
-import { Card } from "./ui";
+import { Button, Card } from "./ui";
 
 function statusFor(answer: AnswerRecord) {
   if (answer.picked === null) return "missed" as const;
@@ -10,37 +10,40 @@ function statusFor(answer: AnswerRecord) {
   return "wrong" as const;
 }
 
-const borderByStatus = {
-  correct: "border-emerald-500/30",
-  wrong: "border-red-500/30",
-  missed: "border-amber-500/30",
+const cardByStatus = {
+  correct: "border-emerald-200 bg-emerald-50/50",
+  wrong: "border-red-200 bg-red-50/50",
+  missed: "border-amber-200 bg-amber-50/50",
+};
+
+const badgeByStatus = {
+  correct: "bg-emerald-500 text-white",
+  wrong: "bg-red-500 text-white",
+  missed: "bg-amber-500 text-white",
 };
 
 const labelByStatus = {
-  correct: "ถูก",
-  wrong: "ผิด",
-  missed: "ไม่ได้ตอบ",
+  correct: "✓ ถูก",
+  wrong: "✗ ผิด",
+  missed: "⏱ ไม่ได้ตอบ",
 };
 
-export function ReviewPanel({
-  attempt,
-}: {
-  attempt: QuizAttempt;
-}) {
+export function ReviewPanel({ attempt }: { attempt: QuizAttempt }) {
   const pct = Math.round((attempt.score / attempt.max_score) * 100);
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
-      <Card>
-        <p className="text-sm text-zinc-500">{attempt.student_name}</p>
-        <p className="mt-1 text-2xl font-medium tracking-tight tabular-nums">
-          {attempt.score}{" "}
-          <span className="text-base text-zinc-500">
-            / {attempt.max_score} ({pct}%)
+      <Card className="border-sky-200 bg-gradient-to-br from-sky-50 to-white text-center">
+        <p className="text-sm font-semibold text-sky-600">{attempt.student_name}</p>
+        <p className="font-heading mt-2 text-4xl font-bold tabular-nums text-slate-800">
+          {attempt.score}
+          <span className="text-lg font-semibold text-slate-400">
+            {" "}
+            / {attempt.max_score}
           </span>
         </p>
-        <p className="mt-1 text-sm text-zinc-400">
-          ถูก {attempt.correct_count}/{attempt.total_questions} ข้อ
+        <p className="mt-1 text-sm font-medium text-emerald-600">
+          {pct}% · ถูก {attempt.correct_count}/{attempt.total_questions} ข้อ
         </p>
       </Card>
 
@@ -52,29 +55,24 @@ export function ReviewPanel({
           const correctText = q.choices[q.correct];
 
           return (
-            <Card
-              key={answer.question}
-              className={borderByStatus[status]}
-            >
+            <Card key={answer.question} className={cardByStatus[status]}>
               <div className="mb-2 flex items-center justify-between gap-2">
-                <span className="text-xs text-zinc-500">ข้อ {answer.question}</span>
+                <span className="text-xs font-bold text-slate-500">
+                  ข้อ {answer.question}
+                </span>
                 <span
-                  className={`text-xs font-medium ${
-                    status === "correct"
-                      ? "text-emerald-400"
-                      : status === "wrong"
-                        ? "text-red-400"
-                        : "text-amber-400"
-                  }`}
+                  className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${badgeByStatus[status]}`}
                 >
                   {labelByStatus[status]}
                 </span>
               </div>
 
-              <p className="text-sm leading-relaxed">{q.text}</p>
+              <p className="text-sm font-medium leading-relaxed text-slate-700">
+                {q.text}
+              </p>
 
               {q.image && (
-                <div className="relative mt-3 overflow-hidden rounded-md border border-zinc-800 bg-white">
+                <div className="relative mt-3 overflow-hidden rounded-xl border border-slate-100 bg-white">
                   <Image
                     src={q.image}
                     alt={`Question ${q.id}`}
@@ -86,25 +84,27 @@ export function ReviewPanel({
               )}
 
               {status !== "correct" && (
-                <div className="mt-3 space-y-1 text-sm">
+                <div className="mt-3 space-y-2 text-sm">
                   {status === "wrong" && answer.choice_text && (
-                    <p className="text-zinc-500">
+                    <p className="text-slate-600">
                       คุณเลือก:{" "}
-                      <span className="mono-science line-through text-red-400/80">
+                      <span className="mono-science font-medium line-through text-red-500">
                         {answer.choice_text}
                       </span>
                     </p>
                   )}
                   {status === "missed" && (
-                    <p className="text-amber-400/90">ไม่ได้ตอบภายในเวลา</p>
+                    <p className="font-medium text-amber-600">
+                      ไม่ได้ตอบภายในเวลา
+                    </p>
                   )}
-                  <p>
+                  <p className="text-slate-700">
                     เฉลย:{" "}
-                    <span className="mono-science text-emerald-400/90">
+                    <span className="mono-science font-semibold text-emerald-600">
                       {correctText}
                     </span>
                   </p>
-                  <p className="mono-science mt-2 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-zinc-400">
+                  <p className="mono-science rounded-xl border border-teal-100 bg-teal-50 px-3 py-2 text-xs text-teal-800">
                     {q.explain}
                   </p>
                 </div>
@@ -115,11 +115,8 @@ export function ReviewPanel({
       </div>
 
       <div className="flex justify-center pb-8">
-        <Link
-          href="/"
-          className="rounded-md border border-zinc-700 px-4 py-2.5 text-sm text-zinc-300 transition hover:border-zinc-500 hover:text-zinc-100"
-        >
-          ลองอีกครั้ง
+        <Link href="/">
+          <Button variant="secondary">ลองอีกครั้ง</Button>
         </Link>
       </div>
     </div>

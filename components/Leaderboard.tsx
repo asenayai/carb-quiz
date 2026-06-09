@@ -2,6 +2,8 @@ import { getSupabase } from "@/lib/supabase/server";
 import { Card } from "./ui";
 import { QUIZ_ID } from "@/lib/quiz-data";
 
+const MEDAL = ["🥇", "🥈", "🥉"];
+
 export async function Leaderboard() {
   let rows: {
     student_name: string;
@@ -26,10 +28,10 @@ export async function Leaderboard() {
   }
 
   return (
-    <Card>
-      <h2 className="mb-3 text-sm font-medium text-zinc-400">อันดับล่าสุด</h2>
+    <Card className="border-amber-100">
+      <h2 className="font-heading mb-3 text-sm font-bold text-amber-700">🏆 อันดับล่าสุด</h2>
       {rows.length === 0 ? (
-        <p className="text-sm text-zinc-600">ยังไม่มีข้อมูล</p>
+        <p className="text-sm text-slate-400">ยังไม่มีข้อมูล — เป็นคนแรกเลย!</p>
       ) : (
         <ul className="space-y-2">
           {rows.map((row, i) => {
@@ -37,15 +39,15 @@ export async function Leaderboard() {
             return (
               <li
                 key={`${row.student_name}-${i}`}
-                className="flex items-center justify-between text-sm"
+                className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 text-sm"
               >
-                <span className="text-zinc-300">
-                  {i + 1}. {row.student_name}
-                  <span className="ml-2 text-xs text-zinc-600">
+                <span className="font-medium text-slate-700">
+                  {MEDAL[i] || `${i + 1}.`} {row.student_name}
+                  <span className="ml-2 text-xs text-slate-400">
                     {row.correct_count}/{row.total_questions}
                   </span>
                 </span>
-                <span className="mono-science tabular-nums text-zinc-400">
+                <span className="mono-science font-bold tabular-nums text-emerald-600">
                   {row.score} ({pct}%)
                 </span>
               </li>

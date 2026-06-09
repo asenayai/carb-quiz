@@ -4,9 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:clean": "rm -rf .next && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test:ci": "npm run lint && npm run test:unit && npm run build && CI=true npm run test:e2e",
     "db:push": "supabase db push",
     "db:reset": "supabase db reset",
     "deploy": "vercel --prod"
@@ -20,15 +25,19 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "supabase": "^2.105.0",
     "@eslint/eslintrc": "^3.3.1",
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4.1.8",
     "@types/node": "^22.15.21",
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.5",
+    "@vitejs/plugin-react": "^6.0.2",
     "eslint": "^9.27.0",
     "eslint-config-next": "^15.3.3",
+    "jsdom": "^29.1.1",
+    "supabase": "^2.105.0",
     "tailwindcss": "^4.1.8",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.8"
   }
 }

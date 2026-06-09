@@ -28,7 +28,7 @@ export function NicknameForm() {
 
   return (
     <Card className="mx-auto max-w-md">
-      <label htmlFor="nickname" className="mb-2 block text-sm text-zinc-400">
+      <label htmlFor="nickname" className="font-heading mb-2 block text-sm font-semibold text-slate-600">
         ชื่อเล่น
       </label>
       <Input
@@ -43,9 +43,9 @@ export function NicknameForm() {
         onKeyDown={(e) => e.key === "Enter" && handleStart()}
         autoFocus
       />
-      {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
+      {error && <p className="mt-2 text-sm font-medium text-red-500">{error}</p>}
       <Button className="mt-4 w-full" onClick={handleStart}>
-        เริ่ม
+        เริ่มเลย
       </Button>
     </Card>
   );

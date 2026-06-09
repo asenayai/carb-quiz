@@ -28,9 +28,9 @@ export default async function ReviewPage({
 
     return (
       <main className="px-4 py-8">
-        <header className="mx-auto mb-6 max-w-2xl">
-          <h1 className="text-lg font-medium tracking-tight">ทบทวนคำตอบ</h1>
-          <p className="mt-1 text-sm text-zinc-500">
+        <header className="mx-auto mb-6 max-w-2xl text-center">
+          <h1 className="text-xl font-bold text-slate-800">ทบทวนคำตอบ</h1>
+          <p className="mt-1 text-sm text-slate-500">
             ข้อที่ผิดและไม่ได้ตอบ พร้อมเฉลย
           </p>
         </header>

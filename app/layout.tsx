@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { GeistMono } from "geist/font/mono";
-import { GeistSans } from "geist/font/sans";
+import { kanit, notoSansThai, thasadith } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Carb Quiz · AP Review",
+  title: "Carb Quiz · MWIT Biology",
   description: "คาร์โบไฮเดรต quiz — glycosidic linkage, hydrolysis",
 };
 
@@ -16,9 +15,9 @@ export default function RootLayout({
   return (
     <html
       lang="th"
-      className={`${GeistSans.className} ${GeistMono.variable} dark`}
+      className={`${notoSansThai.variable} ${kanit.variable} ${thasadith.variable}`}
     >
-      <body className="min-h-screen">{children}</body>
+      <body className={notoSansThai.className}>{children}</body>
     </html>
   );
 }

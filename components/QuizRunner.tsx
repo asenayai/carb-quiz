@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getStoredNickname } from "./NicknameForm";
-import { Button, Card, ProgressBar } from "./ui";
+import { Button, Card, CHOICE_TILE_CLASS, ProgressBar } from "./ui";
 import { QUESTIONS } from "@/lib/quiz-data";
 import type { PickPayload } from "@/lib/types";
 
@@ -91,14 +91,25 @@ export function QuizRunner() {
     }
   }
 
+  function choiceClass(i: number) {
+    if (!answered) return CHOICE_TILE_CLASS[i];
+    if (i === q.correct) return "choice-tile-correct";
+    if (i === picked) return "choice-tile-wrong";
+    return "choice-tile-faded";
+  }
+
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="mb-4 flex items-center justify-between text-sm text-zinc-500">
-        <span>
+      <div className="mb-3 flex items-center justify-between text-sm font-semibold text-slate-500">
+        <span className="font-heading rounded-full bg-sky-100 px-3 py-1 font-semibold text-sky-700">
           ข้อ {current + 1}/{QUESTIONS.length}
         </span>
         <span
-          className={`mono-science text-lg font-medium tabular-nums ${timeLeft <= 5 && !answered ? "text-red-400" : "text-zinc-300"}`}
+          className={`mono-science flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold tabular-nums ${
+            timeLeft <= 5 && !answered
+              ? "bg-orange-100 text-orange-600 ring-2 ring-orange-300"
+              : "bg-white text-slate-700 shadow-sm ring-1 ring-slate-200"
+          }`}
         >
           {timeLeft}
         </span>
@@ -106,10 +117,12 @@ export function QuizRunner() {
       <ProgressBar value={current + (answered ? 1 : 0)} max={QUESTIONS.length} />
 
       <Card className="mt-4">
-        <p className="text-[15px] leading-relaxed tracking-tight">{q.text}</p>
+        <p className="text-[15px] font-medium leading-relaxed text-slate-700">
+          {q.text}
+        </p>
 
         {q.image && (
-          <div className="relative mt-4 overflow-hidden rounded-md border border-zinc-800 bg-white">
+          <div className="relative mt-4 overflow-hidden rounded-xl border-2 border-slate-100 bg-white shadow-inner">
             <Image
               src={q.image}
               alt={`Question ${q.id}`}
@@ -121,34 +134,24 @@ export function QuizRunner() {
           </div>
         )}
 
-        <div className="mt-4 grid gap-2">
-          {q.choices.map((choice, i) => {
-            let cls = "border-zinc-800 bg-zinc-950 hover:border-zinc-600";
-            if (answered) {
-              if (i === q.correct) cls = "border-emerald-500/40 bg-emerald-500/10";
-              else if (i === picked) cls = "border-red-500/40 bg-red-500/10";
-              else cls = "border-zinc-800 opacity-50";
-            }
-            return (
-              <button
-                key={i}
-                disabled={answered}
-                onClick={() => reveal(i)}
-                className={`flex items-start gap-3 rounded-md border px-3 py-3 text-left text-sm transition ${cls}`}
-              >
-                <span className="mono-science mt-0.5 text-xs text-zinc-500">
-                  {SHAPES[i]}
-                </span>
-                <span className="mono-science">{choice}</span>
-              </button>
-            );
-          })}
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {q.choices.map((choice, i) => (
+            <button
+              key={i}
+              disabled={answered}
+              onClick={() => reveal(i)}
+              className={`flex items-start gap-2 rounded-xl px-3 py-3 text-left text-sm font-semibold transition active:translate-y-0.5 ${choiceClass(i)}`}
+            >
+              <span className="mt-0.5 text-base opacity-80">{SHAPES[i]}</span>
+              <span className="mono-science leading-snug">{choice}</span>
+            </button>
+          ))}
         </div>
 
         {showExplain && (
-          <p className="mono-science mt-4 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-zinc-400">
-            {q.explain}
-          </p>
+          <div className="mono-science mt-4 rounded-xl border-2 border-teal-100 bg-teal-50 px-4 py-3 text-sm text-teal-800">
+            💡 {q.explain}
+          </div>
         )}
 
         {answered && (
@@ -160,7 +163,7 @@ export function QuizRunner() {
             {submitting
               ? "กำลังบันทึก..."
               : current < QUESTIONS.length - 1
-                ? "ข้อถัดไป"
+                ? "ข้อถัดไป →"
                 : "ดูผลและทบทวน"}
           </Button>
         )}

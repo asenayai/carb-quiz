@@ -1,22 +1,70 @@
 @import "tailwindcss";
 
 @theme {
-  --color-surface: #18181b;
-  --color-border: #27272a;
-  --color-muted: #71717a;
-  --color-correct: rgb(16 185 129 / 0.2);
-  --color-wrong: rgb(239 68 68 / 0.2);
-  --color-missed: rgb(245 158 11 / 0.2);
+  --color-science-teal: #0d9488;
+  --color-science-sky: #38bdf8;
+  --color-duo-green: #58cc02;
+  --color-duo-green-dark: #46a302;
+  --font-sans: var(--font-noto), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-kanit), ui-sans-serif, sans-serif;
+  --font-accent: var(--font-thasadith), ui-serif, serif;
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
-  @apply bg-zinc-950 text-zinc-100 antialiased;
+  @apply min-h-screen bg-gradient-to-b from-sky-50 via-white to-emerald-50/40 text-slate-800 antialiased;
+  font-family: var(--font-noto), ui-sans-serif, system-ui, sans-serif;
+}
+
+.font-heading {
+  font-family: var(--font-kanit), ui-sans-serif, sans-serif;
+}
+
+.font-accent {
+  font-family: var(--font-thasadith), ui-serif, serif;
 }
 
 .mono-science {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-family: var(--font-kanit), ui-sans-serif, sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* Duolingo-style choice tiles */
+.choice-tile-0 {
+  @apply border-b-4 border-red-500 bg-red-400 text-white shadow-sm;
+}
+.choice-tile-0:hover:not(:disabled) {
+  @apply bg-red-500;
+}
+.choice-tile-1 {
+  @apply border-b-4 border-blue-600 bg-blue-500 text-white shadow-sm;
+}
+.choice-tile-1:hover:not(:disabled) {
+  @apply bg-blue-600;
+}
+.choice-tile-2 {
+  @apply border-b-4 border-amber-500 bg-amber-400 text-slate-900 shadow-sm;
+}
+.choice-tile-2:hover:not(:disabled) {
+  @apply bg-amber-500;
+}
+.choice-tile-3 {
+  @apply border-b-4 border-emerald-600 bg-emerald-500 text-white shadow-sm;
+}
+.choice-tile-3:hover:not(:disabled) {
+  @apply bg-emerald-600;
+}
+
+.choice-tile-correct {
+  @apply border-b-4 border-emerald-600 bg-emerald-500 text-white ring-2 ring-emerald-300;
+}
+.choice-tile-wrong {
+  @apply border-b-4 border-red-600 bg-red-500 text-white opacity-90;
+}
+.choice-tile-faded {
+  @apply border border-slate-200 bg-slate-100 text-slate-400 opacity-60;
 }
