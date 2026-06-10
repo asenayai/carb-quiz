@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getStoredNickname } from "./NicknameForm";
+import { getStoredClass, getStoredNickname } from "./NicknameForm";
 import { Button, Card, CHOICE_TILE_CLASS, ProgressBar } from "./ui";
 import { QUESTIONS } from "@/lib/quiz-data";
 import type { PickPayload } from "@/lib/types";
@@ -82,7 +82,8 @@ export function QuizRunner({
     }
 
     const nickname = getStoredNickname();
-    if (!nickname) {
+    const classLabel = getStoredClass();
+    if (!nickname || !classLabel) {
       router.replace("/");
       return;
     }
@@ -94,6 +95,7 @@ export function QuizRunner({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nickname,
+          classLabel,
           picks: picksRef.current,
           durationSec: Math.round((Date.now() - startedAt) / 1000),
         }),
@@ -116,10 +118,17 @@ export function QuizRunner({
 
   return (
     <div className="mx-auto w-full max-w-5xl px-2 sm:px-4">
-      <div className="mb-4 flex items-center justify-between text-sm font-semibold text-slate-500">
-        <span className="font-heading rounded-full bg-sky-100 px-4 py-1.5 font-semibold text-sky-700">
-          ข้อ {current + 1}/{QUESTIONS.length}
-        </span>
+      <div className="mb-4 flex items-center justify-between gap-2 text-sm font-semibold text-slate-500">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-heading rounded-full bg-sky-100 px-4 py-1.5 font-semibold text-sky-700">
+            ข้อ {current + 1}/{QUESTIONS.length}
+          </span>
+          {getStoredClass() && (
+            <span className="font-heading rounded-full bg-teal-50 px-3 py-1 text-xs font-medium text-teal-700 ring-1 ring-teal-200">
+              {getStoredClass()}
+            </span>
+          )}
+        </div>
         <span
           className={`mono-science flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold tabular-nums ${
             timeLeft <= 5 && !answered

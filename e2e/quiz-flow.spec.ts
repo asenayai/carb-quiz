@@ -6,11 +6,15 @@ test.describe("quiz flow", () => {
     await page.goto("/");
     await page.evaluate(() => {
       sessionStorage.setItem("carb-quiz-nickname", "E2E Player");
+      sessionStorage.setItem("carb-quiz-class", "M.4/1");
     });
   });
 
   test("redirects to home without nickname", async ({ page }) => {
-    await page.evaluate(() => sessionStorage.removeItem("carb-quiz-nickname"));
+    await page.evaluate(() => {
+      sessionStorage.removeItem("carb-quiz-nickname");
+      sessionStorage.removeItem("carb-quiz-class");
+    });
     await page.goto("/quiz");
     await expect(page).toHaveURL("/");
   });

@@ -13,7 +13,7 @@ export default function HomePage() {
           คาร์โบไฮเดรต
         </h1>
         <p className="mt-2 text-base text-slate-500">
-          ใส่ชื่อเล่นแล้วเริ่มเลย
+          ใส่ชั้น/ห้องและชื่อเล่นแล้วเริ่มเลย
         </p>
       </header>
       <NicknameForm />

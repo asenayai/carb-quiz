@@ -4,31 +4,67 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, Card, Input } from "./ui";
 
-const NICKNAME_KEY = "carb-quiz-nickname";
+export const NICKNAME_KEY = "carb-quiz-nickname";
+export const CLASS_KEY = "carb-quiz-class";
 
 export function getStoredNickname(): string | null {
   if (typeof window === "undefined") return null;
   return sessionStorage.getItem(NICKNAME_KEY);
 }
 
+export function getStoredClass(): string | null {
+  if (typeof window === "undefined") return null;
+  return sessionStorage.getItem(CLASS_KEY);
+}
+
 export function NicknameForm() {
   const router = useRouter();
   const [nickname, setNickname] = useState("");
+  const [classRoom, setClassRoom] = useState("");
   const [error, setError] = useState("");
 
   function handleStart() {
-    const trimmed = nickname.trim();
-    if (!trimmed) {
+    const trimmedName = nickname.trim();
+    const trimmedClass = classRoom.trim();
+
+    if (!trimmedName) {
       setError("ใส่ชื่อเล่นก่อนนะ");
       return;
     }
-    sessionStorage.setItem(NICKNAME_KEY, trimmed.slice(0, 24));
+    if (!trimmedClass) {
+      setError("ใส่ชั้น/ห้องก่อนนะ");
+      return;
+    }
+
+    sessionStorage.setItem(NICKNAME_KEY, trimmedName.slice(0, 24));
+    sessionStorage.setItem(CLASS_KEY, trimmedClass.slice(0, 48));
     router.push("/quiz");
   }
 
   return (
     <Card className="mx-auto w-full">
-      <label htmlFor="nickname" className="font-heading mb-2 block text-sm font-semibold text-slate-600">
+      <label
+        htmlFor="class-room"
+        className="font-heading mb-2 block text-sm font-semibold text-slate-600"
+      >
+        ชั้น / ห้อง
+      </label>
+      <Input
+        id="class-room"
+        placeholder="เช่น M.4/1, ม.4 ห้อง 2"
+        maxLength={48}
+        value={classRoom}
+        onChange={(e) => {
+          setClassRoom(e.target.value);
+          setError("");
+        }}
+        autoFocus
+      />
+
+      <label
+        htmlFor="nickname"
+        className="font-heading mb-2 mt-4 block text-sm font-semibold text-slate-600"
+      >
         ชื่อเล่น
       </label>
       <Input
@@ -41,7 +77,6 @@ export function NicknameForm() {
           setError("");
         }}
         onKeyDown={(e) => e.key === "Enter" && handleStart()}
-        autoFocus
       />
       {error && <p className="mt-2 text-sm font-medium text-red-500">{error}</p>}
       <Button className="mt-4 w-full" onClick={handleStart}>

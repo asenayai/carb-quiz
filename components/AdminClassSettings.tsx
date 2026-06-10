@@ -88,13 +88,13 @@ export function AdminClassSettings({
         ชั้นเรียน
       </h3>
       <p className="mb-4 text-sm text-slate-500">
-        ตั้งชื่อชั้นก่อนให้นักเรียนทำ quiz · รีเซ็ตเมื่อเริ่มชั้นใหม่
+        นักเรียนกรอกชั้น/ห้องที่หน้าแรก · กรองและรีเซ็ตผลตามชั้นได้ที่นี่
       </p>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-3">
           <label className="font-heading block text-sm font-medium text-slate-600">
-            ชั้นเรียนปัจจุบัน (นักเรียนใหม่จะบันทึกในชั้นนี้)
+            ค่าเริ่มต้น (ใช้เมื่อนักเรียนไม่ได้กรอกชั้น/ห้อง)
           </label>
           <div className="flex gap-2">
             <Input

@@ -13,6 +13,7 @@ const pickSchema = z.object({
 
 const bodySchema = z.object({
   nickname: z.string().trim().min(1).max(24),
+  classLabel: z.string().trim().min(1).max(48).optional(),
   picks: z.array(pickSchema).length(5),
   durationSec: z.number().int().min(0).optional(),
 });
@@ -28,10 +29,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const { nickname, picks, durationSec } = parsed.data;
+    const { nickname, classLabel: studentClass, picks, durationSec } =
+      parsed.data;
     const computed = computeAttempt(picks);
     const supabase = getSupabase();
-    const classLabel = await getCurrentClass(supabase);
+    const classLabel =
+      studentClass?.trim() || (await getCurrentClass(supabase));
 
     const { data: attempt, error: attemptError } = await supabase
       .from("quiz_attempts")
