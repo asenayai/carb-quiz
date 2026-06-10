@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { CLASS_ROOMS, isValidClassRoom, mergeClassLabels } from "@/lib/class-rooms";
 import { Button, Card, Input } from "./ui";
 
 type Props = {
@@ -20,7 +21,13 @@ export function AdminClassSettings({
   onClassChange,
   onRefresh,
 }: Props) {
-  const [newClass, setNewClass] = useState(currentClass);
+  const [newClass, setNewClass] = useState<string>(
+    isValidClassRoom(currentClass) ? currentClass : CLASS_ROOMS[0]
+  );
+
+  useEffect(() => {
+    setNewClass(isValidClassRoom(currentClass) ? currentClass : CLASS_ROOMS[0]);
+  }, [currentClass]);
   const [resetConfirm, setResetConfirm] = useState("");
   const [resetScope, setResetScope] = useState<"class" | "all">("class");
   const [busy, setBusy] = useState(false);
@@ -97,12 +104,17 @@ export function AdminClassSettings({
             ค่าเริ่มต้น (ใช้เมื่อนักเรียนไม่ได้กรอกชั้น/ห้อง)
           </label>
           <div className="flex gap-2">
-            <Input
+            <select
               value={newClass}
               onChange={(e) => setNewClass(e.target.value)}
-              placeholder="เช่น M.4/1, M.4/2"
-              maxLength={48}
-            />
+              className="w-full rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-sky-400"
+            >
+              {CLASS_ROOMS.map((room) => (
+                <option key={room} value={room}>
+                  {room}
+                </option>
+              ))}
+            </select>
             <Button onClick={saveClass} disabled={busy}>
               บันทึก
             </Button>
@@ -121,8 +133,8 @@ export function AdminClassSettings({
             onChange={(e) => onClassChange(e.target.value)}
             className="w-full rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-sky-400"
           >
-            <option value="">ทุกชั้นเรียน</option>
-            {classLabels.map((c) => (
+            <option value="">ทุกห้อง</option>
+            {mergeClassLabels(classLabels).map((c) => (
               <option key={c} value={c}>
                 {c}
               </option>

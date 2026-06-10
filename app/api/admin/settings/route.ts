@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { CLASS_ROOMS, mergeClassLabels } from "@/lib/class-rooms";
 import { setSetting } from "@/lib/quiz-settings";
 import { getSupabase } from "@/lib/supabase/server";
 import { checkAdminPassword } from "@/lib/utils";
 
 const bodySchema = z.object({
-  currentClass: z.string().trim().min(1).max(48).optional(),
+  currentClass: z.enum(CLASS_ROOMS).optional(),
 });
 
 export async function POST(request: Request) {
@@ -49,12 +50,10 @@ export async function GET(request: Request) {
       .select("class_label")
       .eq("quiz_id", "carb-ap");
 
-    const classLabels = [
-      ...new Set([
-        config.currentClass,
-        ...(classes || []).map((r) => r.class_label as string),
-      ]),
-    ].filter(Boolean);
+    const classLabels = mergeClassLabels([
+      config.currentClass,
+      ...(classes || []).map((r) => r.class_label as string),
+    ]);
 
     return NextResponse.json({ ...config, classLabels });
   } catch (err) {

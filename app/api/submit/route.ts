@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { CLASS_ROOMS } from "@/lib/class-rooms";
 import { QUIZ_ID } from "@/lib/quiz-data";
 import { getCurrentClass } from "@/lib/quiz-settings";
 import { computeAttempt } from "@/lib/scoring";
@@ -13,7 +14,7 @@ const pickSchema = z.object({
 
 const bodySchema = z.object({
   nickname: z.string().trim().min(1).max(24),
-  classLabel: z.string().trim().min(1).max(48).optional(),
+  classLabel: z.enum(CLASS_ROOMS).optional(),
   picks: z.array(pickSchema).length(5),
   durationSec: z.number().int().min(0).optional(),
 });

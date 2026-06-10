@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { QUIZ_ID } from "@/lib/quiz-data";
+import { mergeClassLabels } from "@/lib/class-rooms";
 import { getQuizConfig } from "@/lib/quiz-settings";
 import { getSupabase } from "@/lib/supabase/server";
 import { checkAdminPassword } from "@/lib/utils";
@@ -76,12 +77,10 @@ export async function GET(request: Request) {
       .eq("quiz_id", QUIZ_ID);
 
     const { currentClass, questionImages } = await getQuizConfig(supabase);
-    const classLabels = [
-      ...new Set([
-        currentClass,
-        ...(allClasses || []).map((r) => r.class_label as string),
-      ]),
-    ].filter(Boolean);
+    const classLabels = mergeClassLabels([
+      currentClass,
+      ...(allClasses || []).map((r) => r.class_label as string),
+    ]);
 
     let questionStats: QuestionStat[] = [];
     if (classFilter) {

@@ -2,10 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { CLASS_ROOMS, isValidClassRoom } from "@/lib/class-rooms";
 import { Button, Card, Input } from "./ui";
 
 export const NICKNAME_KEY = "carb-quiz-nickname";
 export const CLASS_KEY = "carb-quiz-class";
+
+const selectClass =
+  "w-full rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-2 focus:ring-sky-100";
 
 export function getStoredNickname(): string | null {
   if (typeof window === "undefined") return null;
@@ -14,7 +18,8 @@ export function getStoredNickname(): string | null {
 
 export function getStoredClass(): string | null {
   if (typeof window === "undefined") return null;
-  return sessionStorage.getItem(CLASS_KEY);
+  const value = sessionStorage.getItem(CLASS_KEY);
+  return value && isValidClassRoom(value) ? value : null;
 }
 
 export function NicknameForm() {
@@ -25,19 +30,18 @@ export function NicknameForm() {
 
   function handleStart() {
     const trimmedName = nickname.trim();
-    const trimmedClass = classRoom.trim();
 
+    if (!classRoom) {
+      setError("เลือกห้องก่อนนะ");
+      return;
+    }
     if (!trimmedName) {
       setError("ใส่ชื่อเล่นก่อนนะ");
       return;
     }
-    if (!trimmedClass) {
-      setError("ใส่ชั้น/ห้องก่อนนะ");
-      return;
-    }
 
     sessionStorage.setItem(NICKNAME_KEY, trimmedName.slice(0, 24));
-    sessionStorage.setItem(CLASS_KEY, trimmedClass.slice(0, 48));
+    sessionStorage.setItem(CLASS_KEY, classRoom);
     router.push("/quiz");
   }
 
@@ -47,19 +51,24 @@ export function NicknameForm() {
         htmlFor="class-room"
         className="font-heading mb-2 block text-sm font-semibold text-slate-600"
       >
-        ชั้น / ห้อง
+        ม.4 ห้อง
       </label>
-      <Input
+      <select
         id="class-room"
-        placeholder="เช่น M.4/1, ม.4 ห้อง 2"
-        maxLength={48}
         value={classRoom}
         onChange={(e) => {
           setClassRoom(e.target.value);
           setError("");
         }}
-        autoFocus
-      />
+        className={selectClass}
+      >
+        <option value="">เลือกห้อง</option>
+        {CLASS_ROOMS.map((room) => (
+          <option key={room} value={room}>
+            {room}
+          </option>
+        ))}
+      </select>
 
       <label
         htmlFor="nickname"
@@ -77,6 +86,7 @@ export function NicknameForm() {
           setError("");
         }}
         onKeyDown={(e) => e.key === "Enter" && handleStart()}
+        autoFocus
       />
       {error && <p className="mt-2 text-sm font-medium text-red-500">{error}</p>}
       <Button className="mt-4 w-full" onClick={handleStart}>
